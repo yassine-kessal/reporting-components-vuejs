@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporting</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans&display=swap" rel="stylesheet">
+  <link href="./styles/litepicker.dark.css" rel="stylesheet">
+  <style>
+    * {
+      font-family: "DM Sans", sans-serif;
+    }
+  </style>
+
+  <script src="../fake_test_stats.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/plugins/ranges.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.0/dist/echarts.min.js"></script>
+
+  <script src="https://unpkg.com/vue@next"></script>
+
+  <!-- Common -->
+  <script src="./utils/common.js" type="text/babel"></script>
+
+  <!-- Components -->
+  <script src="./components/loading.js" type="text/babel"></script>
+  <script src="./components/dropdown.js" type="text/babel"></script>
+  <script src="./components/dark-mode.js" type="text/babel"></script>
+  <script src="./components/form-field.js" type="text/babel"></script>
+  <script src="./components/daterange-picker.js" type="text/babel"></script>
+  <script src="./components/bar-chart.js" type="text/babel"></script>
+
+  <script type="text/babel">
+    function numStr(a, b) {
+      a = '' + a;
+      b = b || ' ';
+      var c = '',
+        d = 0;
+      while (a.match(/^0[0-9]/)) {
+        a = a.substr(1);
+      }
+      for (var i = a.length - 1; i >= 0; i--) {
+        c = (d != 0 && d % 3 == 0) ? a[i] + b + c : a[i] + c;
+        d++;
+      }
+      return c;
+    }
+
+    const store = {
+      state: Vue.reactive({
+        globalTotalValueData: 0
+      }),
+      setGlobalTotalValueData(value) {
+        this.state.globalTotalValueData = numStr(value);
+      }
+    }
+
+    /**
+    Tailwind config
+    **/
+    tailwind.config = {
+      darkMode: 'class',
+    }
+
+    /**
+    Application
+    **/
+    const MainApplication = {
+      components: {
+        Loading,
+        Dropdown,
+        DropdownItem,
+        DarkMode,
+        FormField,
+        DaterangePicker,
+        BarChart
+      },
+      setup() {
+        const [isLoading] = useLoading();
+
+        return {
+          isLoading,
+        }
+      },
+      data() {
+        return {
+          unit: 2, // 1 = clics, 2 = ouvertures
+          store: store.state,
+          agregates: {
+            device: deviceAgregates,
+            osFamily: osFamilyAgregates,
+            browser: browserAgregates,
+            osName: osNameAgregates
+          },
+        }
+      },
+      mounted() {
+        console.log(this.$uri({
+          test: 'Hello',
+          another: 'hi',
+          test: 'hello2'
+        }));
+      },
+      methods: {
+        setUnit(unit) {
+          this.unit = unit;
+        },
+        handleFormFilter() {
+          if (this.$refs.daterange) {
+            console.log(this.$refs.daterange.picker.getStartDate())
+            console.log(this.$refs.daterange.picker.getEndDate())
+          }
+        },
+        setGlobalTotalValueData(total) {
+          store.setGlobalTotalValueData(total);
+        },
+        reloadPage() {
+          this.isLoading = true;
+          location.reload();
+        }
+      }
+    };
+
+    const app = Vue.createApp(MainApplication);
+
+    app.use(CommonPlugin);
+
+    app.mount('#app');
+  </script>
+</head>
+
+<body class="bg-gray-100 antialiased">
+  <div id="app">
+    <!-- Loading -->
+    <loading v-if="isLoading"></loading>
+
+    <!-- Sidebar -->
+    <div class="w-full flex">
+      <div
+        class="flex flex-col w-64 px-4 py-8 bg-white border-r dark:bg-gray-800 dark:border-gray-600 min-h-screen hidden md:flex">
+        <h2 class="text-3xl font-semibold text-gray-800 dark:text-white">Statistiques</h2>
+
+        <div class="flex flex-col justify-between flex-1 mt-6">
+          <nav>
+            <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-gray-200"
+              href="#">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+
+              <span class="mx-4 font-medium">Devices</span>
+            </a>
+
+            <a class="flex items-center px-4 py-2 mt-5 text-gray-400 cursor-not-allowed transform rounded-md dark:text-gray-500"
+              href="#" @click.prevent="$event.preventDefault()">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M15 5V7M15 11V13M15 17V19M5 5C3.89543 5 3 5.89543 3 7V10C4.10457 10 5 10.8954 5 12C5 13.1046 4.10457 14 3 14V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V14C19.8954 14 19 13.1046 19 12C19 10.8954 19.8954 10 21 10V7C21 5.89543 20.1046 5 19 5H5Z"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+
+              <span class="mx-4 font-medium">
+                Offres GDP
+                <small class="block text-xs">En développement</small>
+              </span>
+            </a>
+
+            <hr class="my-6 border-gray-200 dark:border-gray-600" />
+
+            <form class="space-y-2" action="/fdj/test_stats_2.jssp" method="GET" @submit="handleFormFilter">
+              <daterange-picker ref="daterange"> </daterange-picker>
+
+              <div class="w-full">
+                <button
+                  class="w-full px-4 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-blue-600 rounded-md hover:bg-blue-500 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
+                  type="submit">
+                  Appliquer
+                </button>
+              </div>
+            </form>
+          </nav>
+        </div>
+      </div>
+      <!-- Sidebar -->
+
+      <!-- Wrapper -->
+      <div class="flex-1 w-full dark:bg-gray-900">
+        <!-- Navbar -->
+        <nav class="bg-white shadow dark:bg-gray-800">
+          <div class="container px-1 py-4 mx-auto md:flex md:justify-between md:items-center">
+            <div class="flex items-center justify-between">
+              <div>
+                <span
+                  class="text-lg font-bold text-gray-800 transition-colors duration-200 transform dark:text-white hover:text-gray-700 dark:hover:text-gray-300">
+                  Total : {{ store.globalTotalValueData }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Mobile Menu open: "block", Menu closed: "hidden" -->
+            <div class="items-center flex">
+              <div class="flex mx-6">
+                <a class="my-1 text-sm font-medium text-gray-700 transition-colors duration-200 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 mx-4 my-0"
+                  href="#" @click.prevent="reloadPage">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </a>
+                <dropdown>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+
+                  <span v-if="unit == 2">Ouverture</span>
+                  <span v-if="unit == 1">Clic</span>
+
+                  <template #items>
+                    <dropdown-item @click.prevent="() => setUnit(2)">Ouverture</dropdown-item>
+                    <dropdown-item @click.prevent="() => setUnit(1)">Clic</dropdown-item>
+                  </template>
+                </dropdown>
+                <dark-mode></dark-mode>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <!-- Navbar -->
+
+        <!-- Body -->
+        <div class="p-4 xl:p-8 grid grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-8">
+          <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
+            <bar-chart ref="deviceAgregates" title="Device" :collection="agregates.device" :unit="unit"
+              @data-counted="(totalData) => setGlobalTotalValueData(totalData)"></bar-chart>
+          </div>
+
+          <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
+            <bar-chart ref="osFamilyAgregates" title="OS" :collection="agregates.osFamily" :unit="unit"></bar-chart>
+          </div>
+
+          <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
+            <bar-chart ref="browserAgregates" title="Navigateur" :collection="agregates.browser" :unit="unit">
+            </bar-chart>
+          </div>
+
+          <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb ">
+            <bar-chart ref="osNameAgregates" title="OS Version" :collection="agregates.osName" :unit="unit"></bar-chart>
+          </div>
+        </div>
+        <!-- Body -->
+      </div>
+      <!-- Wrapper -->
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+:root {
+  --litepicker-is-start-color-bg: rgb(37 99 235);
+  --litepicker-is-end-color-bg: rgb(37 99 235);
+}
+
+.dark {
+  /* change background color for .container__months */
+  --litepicker-container-months-color-bg: rgb(17 24 39) !important;
+  --litepicker-container-months-box-shadow-color: #fff;
+  --litepicker-footer-color-bg: #fafafa;
+  --litepicker-footer-box-shadow-color: #ddd;
+  --litepicker-tooltip-color-bg: #fff;
+  --litepicker-month-header-color: #fff;
+  --litepicker-button-prev-month-color: #fff;
+  --litepicker-button-next-month-color: #fff;
+  --litepicker-button-prev-month-color-hover: rgb(37 99 235);
+  --litepicker-button-next-month-color-hover: rgb(37 99 235);
+  --litepicker-month-width: calc(var(--litepicker-day-width) * 7);
+  --litepicker-month-weekday-color: #fff;
+  --litepicker-month-week-number-color: #fff;
+  --litepicker-day-width: 38px;
+  --litepicker-day-color: #fff;
+  --litepicker-day-color-hover: rgb(37 99 235);
+  --litepicker-is-today-color: #f44336;
+  --litepicker-is-in-range-color: rgb(31 41 55);
+  --litepicker-is-locked-color: #fff;
+  --litepicker-is-start-color: #fff;
+  --litepicker-is-start-color-bg: rgb(37 99 235);
+  --litepicker-is-end-color: #fff;
+  --litepicker-is-end-color-bg: rgb(37 99 235);
+  --litepicker-button-cancel-color: #fff;
+  --litepicker-button-cancel-color-bg: #fff;
+  --litepicker-button-apply-color: #fff;
+  --litepicker-button-apply-color-bg: rgb(37 99 235);
+  --litepicker-button-reset-color: #fff;
+  --litepicker-button-reset-color-hover: rgb(37 99 235);
+  --litepicker-highlighted-day-color: #fff;
+  --litepicker-highlighted-day-color-bg: #ffeb3b;
+}
+
+.container__predefined-ranges {
+  padding: 8px;
+}
+.dark .container__predefined-ranges {
+  color: white;
+}
