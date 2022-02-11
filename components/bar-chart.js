@@ -52,27 +52,32 @@ const BarChart = {
       default: 2,
     },
   },
-  data() {
-    return {
-      elID: null, // unique id for chart
-      categoryData: [], // all categories data xaxis
-      valueData: [], // all values data yaxis
-      totalData: 0, // sum of all valueData
-      reduceData: true, // mask or no data
-      reduceTo: 1, // value in percent
-      colors: {}, // colors of bar
+  setup(props, { emit }) {
+    const elID = Vue.ref(null);
+    const categoryData = Vue.ref([]);
+    const valueData = Vue.ref([]);
+    const totalData = Vue.ref(0);
+    const reduceData = Vue.ref(true);
+    const reduceTo = Vue.ref(1);
+    const colors = Vue.ref({});
+
+    /**
+     *
+     */
+    const toggleReduceData = () => {
+      reduceData.value = !reduceData.value;
     };
-  },
-  emits: ["dataCounted"],
-  methods: {
-    formatData() {
+
+    /**
+     *
+     */
+    const formatData = () => {
       var newCategoryData = [],
         newValueData = [],
         newTotalData = 0,
         newColors = {},
-        reduceTo = this.reduceTo,
-        unit = this.unit,
-        collection = this.collection.filter((item) => item.type == unit);
+        unit = props.unit,
+        collection = props.collection.filter((item) => item.type == unit);
 
       collection.forEach((item) => {
         newCategoryData.push(item.key);
@@ -82,14 +87,14 @@ const BarChart = {
         newColors[item.key] = getRandomColor();
       });
 
-      if (this.reduceData) {
+      if (reduceData.value && reduceTo.value > 0) {
         var maskedValueData = 0;
 
         newCategoryData = [];
         newValueData = [];
 
         collection.forEach((item, i) => {
-          if ((item.value * 100) / newTotalData > reduceTo) {
+          if ((item.value * 100) / newTotalData > reduceTo.value) {
             newCategoryData.push(item.key);
             newValueData.push(item.value);
           } else {
@@ -102,119 +107,127 @@ const BarChart = {
         newColors["Masked"] = getRandomColor();
       }
 
-      this.categoryData = newCategoryData;
-      this.valueData = newValueData;
-      this.totalData = newTotalData;
-      this.colors = newColors;
+      categoryData.value = newCategoryData;
+      valueData.value = newValueData;
+      totalData.value = newTotalData;
+      colors.value = newColors;
 
-      this.$emit("dataCounted", newTotalData);
-    },
-    updateChart() {
-      var chart = echarts.getInstanceByDom(document.getElementById(this.elID));
+      emit("dataCounted", newTotalData);
+    };
+
+    /**
+     *
+     */
+    const updateChart = () => {
+      var chart = echarts.getInstanceByDom(document.getElementById(elID.value));
 
       chart.setOption({
         xAxis: {
-          data: this.categoryData,
+          data: categoryData.value,
         },
         series: [
           {
-            data: this.valueData,
+            data: valueData.value,
           },
         ],
       });
-    },
-    toggleReduceData() {
-      this.reduceData = !this.reduceData;
-    },
-  },
-  watch: {
-    reduceData(value) {
-      this.formatData();
-
-      this.updateChart();
-    },
-    unit(value) {
-      this.formatData();
-
-      this.updateChart();
-    },
-  },
-  mounted() {
-    this.elID = "chart-" + Vue.getCurrentInstance().uid;
-
-    this.formatData();
-
-    var option = {
-      toolbox: {
-        feature: {
-          dataZoom: {
-            yAxisIndex: false,
-          },
-          saveAsImage: {
-            pixelRatio: 2,
-          },
-          dataView: {},
-        },
-      },
-      tooltip: {
-        trigger: "axis",
-        formatter: (params) => tooltipFormatter(params, this.totalData),
-        axisPointer: {
-          type: "shadow",
-          animation: false,
-        },
-      },
-      grid: {
-        bottom: 150,
-      },
-      dataZoom: [
-        {
-          type: "inside",
-        },
-        {
-          type: "slider",
-        },
-      ],
-      xAxis: {
-        data: this.categoryData,
-        silent: false,
-        splitLine: {
-          show: false,
-        },
-        splitArea: {
-          show: false,
-        },
-        axisLabel: {
-          rotate: 45,
-        },
-      },
-      yAxis: {
-        splitArea: {
-          show: false,
-        },
-        axisLabel: {
-          rotate: 45,
-        },
-      },
-      series: [
-        {
-          name: "Valeur",
-          type: "bar",
-          data: this.valueData,
-          large: true,
-          itemStyle: {
-            color: (param) => {
-              return this.colors[param.name];
-            },
-          },
-        },
-      ],
     };
 
-    this.$nextTick(() => {
-      var chart = echarts.init(document.getElementById(this.elID));
-      chart.setOption(option);
+    /**
+     *
+     */
+    Vue.onMounted(() => {
+      elID.value = "chart-" + Vue.getCurrentInstance().uid;
+
+      formatData();
+
+      var option = {
+        toolbox: {
+          feature: {
+            dataZoom: {
+              yAxisIndex: false,
+            },
+            saveAsImage: {
+              pixelRatio: 2,
+            },
+            dataView: {},
+          },
+        },
+        tooltip: {
+          trigger: "axis",
+          formatter: (params) => tooltipFormatter(params, totalData.value),
+          axisPointer: {
+            type: "shadow",
+            animation: false,
+          },
+        },
+        grid: {
+          bottom: 150,
+        },
+        dataZoom: [
+          {
+            type: "inside",
+          },
+          {
+            type: "slider",
+          },
+        ],
+        xAxis: {
+          data: categoryData.value,
+          silent: false,
+          splitLine: {
+            show: false,
+          },
+          splitArea: {
+            show: false,
+          },
+          axisLabel: {
+            rotate: 45,
+          },
+        },
+        yAxis: {
+          splitArea: {
+            show: false,
+          },
+          axisLabel: {
+            rotate: 45,
+          },
+        },
+        series: [
+          {
+            name: "Valeur",
+            type: "bar",
+            data: valueData.value,
+            large: true,
+            itemStyle: {
+              color: (param) => {
+                return colors.value[param.name];
+              },
+            },
+          },
+        ],
+      };
+
+      Vue.nextTick(() => {
+        var chart = echarts.init(document.getElementById(elID.value));
+        chart.setOption(option);
+      });
     });
+
+    /**
+     *
+     */
+    Vue.watch([reduceData, () => props.unit], (value) => {
+      formatData();
+
+      updateChart();
+    });
+
+    return {
+      elID,
+      reduceData,
+      toggleReduceData,
+    };
   },
   template: `
   <div>

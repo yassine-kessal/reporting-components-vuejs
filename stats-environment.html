@@ -38,29 +38,7 @@
   <script src="./components/bar-chart.js" type="text/babel"></script>
 
   <script type="text/babel">
-    function numStr(a, b) {
-      a = '' + a;
-      b = b || ' ';
-      var c = '',
-        d = 0;
-      while (a.match(/^0[0-9]/)) {
-        a = a.substr(1);
-      }
-      for (var i = a.length - 1; i >= 0; i--) {
-        c = (d != 0 && d % 3 == 0) ? a[i] + b + c : a[i] + c;
-        d++;
-      }
-      return c;
-    }
-
-    const store = {
-      state: Vue.reactive({
-        globalTotalValueData: 0
-      }),
-      setGlobalTotalValueData(value) {
-        this.state.globalTotalValueData = numStr(value);
-      }
-    }
+    const globalTotalValueData = Vue.ref(0);
 
     /**
     Tailwind config
@@ -82,50 +60,55 @@
         DaterangePicker,
         BarChart
       },
-      setup() {
-        const [isLoading] = useLoading();
+      setup(props, ctx) {
+        const [isLoading, setIsLoading] = useLoading();
+        const [unit, setUnit] = useUnit();
+
+        const agregates = Vue.reactive({
+          device: deviceAgregates,
+          osFamily: osFamilyAgregates,
+          browser: browserAgregates,
+          osName: osNameAgregates
+        });
+
+        const daterange = Vue.ref(null);
+
+        const setGlobalTotalValueData = (total) => {
+          globalTotalValueData.value = numStr(total);
+        };
+
+        const reloadPage = () => {
+          setIsLoading(true);
+          location.reload();
+        }
+
+        const handleFormFilter = (e) => {
+          setIsLoading(true);
+
+          if (daterange.value) {
+            console.log(daterange.value.picker.getStartDate())
+            console.log(daterange.value.picker.getEndDate())
+          }
+        };
+
+        Vue.onMounted(() => {
+          daterange.value.picker.setStartDate("2022-02-09");
+          daterange.value.picker.setEndDate("2022-02-10");
+        });
 
         return {
           isLoading,
+          setIsLoading,
+          unit,
+          setUnit,
+          globalTotalValueData,
+          setGlobalTotalValueData,
+          agregates,
+          reloadPage,
+          daterange,
+          handleFormFilter
         }
       },
-      data() {
-        return {
-          unit: 2, // 1 = clics, 2 = ouvertures
-          store: store.state,
-          agregates: {
-            device: deviceAgregates,
-            osFamily: osFamilyAgregates,
-            browser: browserAgregates,
-            osName: osNameAgregates
-          },
-        }
-      },
-      mounted() {
-        console.log(this.$uri({
-          test: 'Hello',
-          another: 'hi',
-          test: 'hello2'
-        }));
-      },
-      methods: {
-        setUnit(unit) {
-          this.unit = unit;
-        },
-        handleFormFilter() {
-          if (this.$refs.daterange) {
-            console.log(this.$refs.daterange.picker.getStartDate())
-            console.log(this.$refs.daterange.picker.getEndDate())
-          }
-        },
-        setGlobalTotalValueData(total) {
-          store.setGlobalTotalValueData(total);
-        },
-        reloadPage() {
-          this.isLoading = true;
-          location.reload();
-        }
-      }
     };
 
     const app = Vue.createApp(MainApplication);
@@ -201,7 +184,7 @@
               <div>
                 <span
                   class="text-lg font-bold text-gray-800 transition-colors duration-200 transform dark:text-white hover:text-gray-700 dark:hover:text-gray-300">
-                  Total : {{ store.globalTotalValueData }}
+                  Total : {{ globalTotalValueData }}
                 </span>
               </div>
             </div>
