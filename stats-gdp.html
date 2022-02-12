@@ -36,10 +36,9 @@
   <script src="./components/form-field.js" type="text/babel"></script>
   <script src="./components/daterange-picker.js" type="text/babel"></script>
   <script src="./components/bar-chart.js" type="text/babel"></script>
+  <script src="./components/stats-card.js" type="text/babel"></script>
 
   <script type="text/babel">
-    const globalTotalValueData = Vue.ref(0);
-
     /**
     Tailwind config
     **/
@@ -58,24 +57,14 @@
         DarkMode,
         FormField,
         DaterangePicker,
-        BarChart
+        BarChart,
+        StatsCard
       },
       setup(props, ctx) {
         const [isLoading, setIsLoading] = useLoading();
-        const [unit, setUnit] = useUnit();
-
-        const agregates = Vue.reactive({
-          device: deviceAgregates,
-          osFamily: osFamilyAgregates,
-          browser: browserAgregates,
-          osName: osNameAgregates
-        });
 
         const daterange = Vue.ref(null);
-
-        const setGlobalTotalValueData = (total) => {
-          globalTotalValueData.value = numStr(total);
-        };
+        const offer = Vue.ref(null);
 
         const reloadPage = () => {
           setIsLoading(true);
@@ -99,11 +88,6 @@
         return {
           isLoading,
           setIsLoading,
-          unit,
-          setUnit,
-          globalTotalValueData,
-          setGlobalTotalValueData,
-          agregates,
           reloadPage,
           daterange,
           handleFormFilter
@@ -132,7 +116,7 @@
 
         <div class="flex flex-col justify-between flex-1 mt-6">
           <nav>
-            <a class="flex items-center px-4 py-2 text-gray-700 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-gray-200"
+            <a class="flex items-center px-4 py-2 text-gray-700 rounded-md hover:dark:bg-gray-700 dark:text-gray-200 hover:bg-gray-200"
               href="#">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -143,7 +127,7 @@
               <span class="mx-4 font-medium">Devices</span>
             </a>
 
-            <a class="flex items-center px-4 py-2 mt-5 text-gray-400 cursor-not-allowed transform rounded-md dark:text-gray-500"
+            <a class="flex items-center px-4 py-2 mt-5 bg-gray-200 text-gray-700 transform rounded-md hover:bg-gray-200 hover:dark:bg-gray-700 dark:text-gray-200 dark:bg-gray-700"
               href="#" @click.prevent="$event.preventDefault()">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -153,14 +137,18 @@
 
               <span class="mx-4 font-medium">
                 Offres GDP
-                <small class="block text-xs">En développement</small>
               </span>
             </a>
 
             <hr class="my-6 border-gray-200 dark:border-gray-600" />
 
-            <form class="space-y-2" action="/fdj/test_stats_2.jssp" method="GET" @submit="handleFormFilter">
+            <form class="space-y-4" action="/fdj/test_stats_2.jssp" method="GET" @submit="handleFormFilter">
               <daterange-picker ref="daterange"> </daterange-picker>
+
+              <div class="space-y-1">
+                <label class="block dark:text-gray-400 cursor-pointer font-bold" for="offer">Offre</label>
+                <form-field ref="offer" id="offer" name="offer" placeholder="Nom interne ou libellé"></form-field>
+              </div>
 
               <div class="w-full">
                 <button
@@ -184,7 +172,7 @@
               <div>
                 <span
                   class="text-lg font-bold text-gray-800 transition-colors duration-200 transform dark:text-white hover:text-gray-700 dark:hover:text-gray-300">
-                  Total : {{ globalTotalValueData }}
+                  PDG or NOT PDG
                 </span>
               </div>
             </div>
@@ -200,21 +188,6 @@
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </a>
-                <dropdown>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-
-                  <span v-if="unit == 2">Ouverture</span>
-                  <span v-if="unit == 1">Clic</span>
-
-                  <template #items>
-                    <dropdown-item @click.prevent="() => setUnit(2)">Ouverture</dropdown-item>
-                    <dropdown-item @click.prevent="() => setUnit(1)">Clic</dropdown-item>
-                  </template>
-                </dropdown>
                 <dark-mode></dark-mode>
               </div>
             </div>
@@ -223,26 +196,17 @@
         <!-- Navbar -->
 
         <!-- Body -->
-        <div class="p-4 xl:p-8 grid grid-cols-1 xl:grid-cols-2 gap-x-4 gap-y-8">
+        <div class="p-4 xl:p-8 grid grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-8">
+          <stats-card></stats-card>
+
           <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
-            <bar-chart ref="deviceAgregates" title="Device" :collection="agregates.device" :unit="unit" :reduce-to="1"
-              @data-counted="(totalData) => setGlobalTotalValueData(totalData)"></bar-chart>
           </div>
 
           <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
-            <bar-chart ref="osFamilyAgregates" title="OS" :collection="agregates.osFamily" :unit="unit" :reduce-to="1">
-            </bar-chart>
-          </div>
-
-          <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
-            <bar-chart ref="browserAgregates" title="Navigateur" :collection="agregates.browser" :unit="unit"
-              :reduce-to="1">
             </bar-chart>
           </div>
 
           <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb ">
-            <bar-chart ref="osNameAgregates" title="OS Version" :collection="agregates.osName" :unit="unit"
-              :reduce-to="1"></bar-chart>
           </div>
         </div>
         <!-- Body -->

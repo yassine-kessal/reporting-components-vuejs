@@ -49,7 +49,11 @@ const BarChart = {
     // unit : 1 = clics, 2 = ouvertures
     unit: {
       required: false,
-      default: 2,
+    },
+    reduceTo: {
+      required: false,
+      type: Number,
+      default: -1,
     },
   },
   setup(props, { emit }) {
@@ -58,7 +62,7 @@ const BarChart = {
     const valueData = Vue.ref([]);
     const totalData = Vue.ref(0);
     const reduceData = Vue.ref(true);
-    const reduceTo = Vue.ref(1);
+    const reduceTo = props.reduceTo;
     const colors = Vue.ref({});
 
     /**
@@ -77,7 +81,11 @@ const BarChart = {
         newTotalData = 0,
         newColors = {},
         unit = props.unit,
-        collection = props.collection.filter((item) => item.type == unit);
+        collection = props.collection;
+
+      if (unit) {
+        collection = collection.filter((item) => item.type == unit);
+      }
 
       collection.forEach((item) => {
         newCategoryData.push(item.key);
@@ -87,14 +95,14 @@ const BarChart = {
         newColors[item.key] = getRandomColor();
       });
 
-      if (reduceData.value && reduceTo.value > 0) {
+      if (reduceData.value && reduceTo > -1) {
         var maskedValueData = 0;
 
         newCategoryData = [];
         newValueData = [];
 
         collection.forEach((item, i) => {
-          if ((item.value * 100) / newTotalData > reduceTo.value) {
+          if ((item.value * 100) / newTotalData > reduceTo) {
             newCategoryData.push(item.key);
             newValueData.push(item.value);
           } else {
@@ -211,6 +219,10 @@ const BarChart = {
       Vue.nextTick(() => {
         var chart = echarts.init(document.getElementById(elID.value));
         chart.setOption(option);
+
+        window.addEventListener("resize", () => {
+          chart.resize();
+        });
       });
     });
 
@@ -237,12 +249,12 @@ const BarChart = {
       </span>
       <div class="flex gap-4 items-center">
         <span
-          class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-200 transform bg-gray-600 rounded">
+          class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-200 transform bg-gray-600 rounded" v-if="unit">
           <template v-if="unit == 2">Ouverture</template>  
           <template v-if="unit == 1">Clic</template>  
         </span>
 
-        <a href="#" @click.prevent="toggleReduceData">
+        <a href="#" @click.prevent="toggleReduceData" v-if="reduceTo > -1">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400" fill="none"
             viewBox="0 0 24 24" stroke="currentColor" v-if="!reduceData">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
