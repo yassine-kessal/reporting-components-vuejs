@@ -20,6 +20,16 @@ function uri(params = {}, href = window.location.href) {
     uri.searchParams.set(param, params[param]);
   }
 
+  // verify if we have securitytoken in current location and push it in params
+  const currentURI = new URL(window.location.href);
+
+  if (currentURI.searchParams.get("__securitytoken")) {
+    uri.searchParams.set(
+      "__securitytoken",
+      currentURI.searchParams.get("__securitytoken")
+    );
+  }
+
   return uri.href;
 }
 
