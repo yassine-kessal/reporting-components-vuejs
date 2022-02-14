@@ -26,5 +26,6 @@ function uri(params = {}, href = window.location.href) {
 const CommonPlugin = {
   install(app, options) {
     app.config.globalProperties.$uri = uri;
+    app.config.globalProperties.$numStr = numStr;
   },
 };
