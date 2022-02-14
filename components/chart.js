@@ -159,8 +159,6 @@ const Chart = {
 
       formatData();
 
-      console.log(props);
-
       var option = {
         toolbox: {
           feature: {
