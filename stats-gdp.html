@@ -197,7 +197,23 @@
 
         <!-- Body -->
         <div class="p-4 xl:p-8 grid grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-8">
-          <stats-card></stats-card>
+          <stats-card>
+            <template #icon>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </template>
+
+            <template #title>
+              Emails envoyés
+            </template>
+
+            <template #value>
+              12 562
+            </template>
+          </stats-card>
 
           <div class="px-8 py-4 mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800 w-full mb">
           </div>
