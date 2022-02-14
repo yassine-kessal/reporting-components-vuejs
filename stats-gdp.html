@@ -72,12 +72,9 @@
         }
 
         const handleFormFilter = (e) => {
-          setIsLoading(true);
+          //setIsLoading(true);
 
-          if (daterange.value) {
-            console.log(daterange.value.picker.getStartDate())
-            console.log(daterange.value.picker.getEndDate())
-          }
+          console.log(offer.value.$el.value);
         };
 
         Vue.onMounted(() => {
@@ -90,6 +87,7 @@
           setIsLoading,
           reloadPage,
           daterange,
+          offer,
           handleFormFilter
         }
       },
@@ -142,7 +140,7 @@
 
             <hr class="my-6 border-gray-200 dark:border-gray-600" />
 
-            <form class="space-y-4" action="/fdj/test_stats_2.jssp" method="GET" @submit="handleFormFilter">
+            <form class="space-y-4" method="GET" @submit.prevent="handleFormFilter">
               <daterange-picker ref="daterange"> </daterange-picker>
 
               <div class="space-y-1">
@@ -169,10 +167,12 @@
         <nav class="bg-white shadow dark:bg-gray-800">
           <div class="container px-1 py-4 mx-auto md:flex md:justify-between md:items-center">
             <div class="flex items-center justify-between">
-              <div>
+              <div class="flex flex-col">
+                <span class="text-sm text-gray-400">
+                  Offre PDJ ?
+                </span>
                 <span
                   class="text-lg font-bold text-gray-800 transition-colors duration-200 transform dark:text-white hover:text-gray-700 dark:hover:text-gray-300">
-                  PDG or NOT PDG
                 </span>
               </div>
             </div>

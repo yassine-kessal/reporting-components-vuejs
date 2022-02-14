@@ -38,7 +38,7 @@ function useUnit() {
   return [unit, set];
 }
 
-const BarChart = {
+const Chart = {
   props: {
     collection: {
       required: true,
@@ -54,6 +54,16 @@ const BarChart = {
       required: false,
       type: Number,
       default: -1,
+    },
+    type: {
+      required: false,
+      type: String,
+      default: "bar",
+    },
+    enableAreaStyle: {
+      required: false,
+      default: false,
+      type: Boolean,
     },
   },
   setup(props, { emit }) {
@@ -149,6 +159,8 @@ const BarChart = {
 
       formatData();
 
+      console.log(props);
+
       var option = {
         toolbox: {
           feature: {
@@ -204,7 +216,11 @@ const BarChart = {
         series: [
           {
             name: "Valeur",
-            type: "bar",
+            type: props.type,
+            areaStyle: {
+              opacity: props.enableAreaStyle ? 1 : 0,
+            },
+            emphasis: {},
             data: valueData.value,
             large: true,
             itemStyle: {
